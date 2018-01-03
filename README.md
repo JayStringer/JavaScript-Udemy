@@ -38,7 +38,16 @@ Console output will be the string "Jay23", the 23 is converted from a float data
 
 ---
 ### **Operator Precedence**
-Some operators have precedence over other, meaning that they are computed first. The is a table for this on this page https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
+Some operators have precedence over other, meaning that they are computed first. The is a table for this on this page https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence.
+
+---
+### **Ternary Operation** 
+A ternary operator or conditional operator can be used to set a variable equal to different values based on a condition. For example:
+
+```JavaScript
+activePlayer === 0 ? activePlayer = 1 : activePlayer = 0;
+// If activePlayer IS equal to 0, then activePlayer = 1, else activePlayer = 0
+```
 
 ---
 ### **If/Else Statements**
@@ -431,3 +440,47 @@ function third() {
 
 ---
 ### **DOM Manipulation**
+**DOM** stands for *Document Object Model*. It is a structured representation of a html document. The DOM is used to connect webpages to scripts like JavaScript.
+
+In your JS you can use:
+```JavaScript
+// This will select whatever has the 'html-id' ID from the document and give it a new value of 10
+document.querySelector("#html-id").textContent = 10;
+
+// This will assign the current value of whatever has the 'html-id' ID to the JS variable
+var x = document.querySelector("#html-id").textContent;
+
+// This will access the css of the class with the name 'class' and hide it
+document.querySelector(".class").style.display = "none";
+
+// You can also access an element by referencing it's ID, this only works with ID
+document.getElementById('<id>').textContent = '0';
+```
+
+Manipulating the value of any css property is done with:
+```JavaScript
+document.querySelector("<selector>").style.<css_propery> = value;
+```
+
+---
+### **Events**
+Events notify the code that something has happened on the webpage. Examples of events are;
+- Clicking a button
+- Resizing a window
+- Scrolling down
+- Pressing a key
+
+An event listener is a function that performs an action based on a certain event, it waits for a specific event to happen. All the different types of events that can be listened for can be found on this reference page https://developer.mozilla.org/en-US/docs/Web/Events.
+
+```JavaScript
+document.querySelector("<selector>").addEventListener("click", function_);
+// Here, the event listener is waiting for a click on the chosen element, in which case it will run a given function as a "callback function".
+
+ 
+// Alternatively, instead of calling a function that is already defined, the function can be written in the event handler argument itself as an anonymous function.
+document.querySelector("<selector>").addEventListener("click", function() {
+    // Do something
+});
+```
+
+An event can only happen once the execution stack is empty, that is, all functions have returned. All events that are waiting to be processed are stored in a message queue.
