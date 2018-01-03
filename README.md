@@ -1,8 +1,5 @@
 # JavaScript Cheat Sheet
 
-## The Basics
-
----
 ### **Data Types**
 - **Numbers:** Both decimal and integer values are represented as floats in JS.
 - **String:** Sequence of characters, used for text.
@@ -315,3 +312,122 @@ for (var i = 1; i <= 5; i++) {
 }
 // This loop will 'continue' to the next iteration of the loop when 'i' is equal to three.
 ```
+
+---
+### **Execution Context**
+An execution context can be thought of as a box, container or wrapper which stores variables, it's where a piece of our code is evaluated and executed.
+
+- **Global Execution Context** Is an execution context that holds all of the code that is not inside of any function. It is associated with the **global object**, in the browser, that's the window object:
+    ```JavaScript
+    lastName === window.lastName // true
+    ```
+- When a **function** is run, it is run in it's own execution context, this is run on top of the execution stack.
+    ```JavaScript
+    var age = 23;
+    
+    function foo() {
+        var age = 65;
+        console.log(age);
+    }
+    foo();
+    console.log(age);
+
+    /*
+    The console log will print 65 then 23, this is because the function is run on top
+    of the execution stack, in this case before the global context where age is defined
+    globally. The two age variables are completely different variables, there is no collision
+    */
+    ```
+
+*An execution object itself is made of:*
+- **Variable Object** 
+    - Contains function arguments, inner variable declarations and function declarations.
+- **Scope Chain**
+    - Contains the current variable objects, and the variable objects of all it's parents. It answers the question "Where can we access a certain variable?"
+- **"This" Variable**
+    - Refers to the object as itself.
+
+*An execution object is created in two phases:*
+- **Creation Phase**
+    - Creation of the Variable Object
+        - The argument object is created, containing all of the arguments that were passed into the function.
+        - Code is scanned for function declarations: for each function, a property is created in the Variable Object, pointing to the function.
+        - Code is scanned for variable declarations: for each variable, a property is created in the Variable Object and set to undefined.
+    - Creation of the scope chain
+        - Each new function creates a scope: the space/environment, in which the variables it defines are accessible.
+        - In JS there is **Lexical Scoping** where a function that is lexically within another function, gets access to the scope of the outer function.
+    - Determine the value of the 'this' variable
+        - In a regular function call the 'this' keyword points at the global object (the window object, in the browser).
+        - In a method call (a function within an object), the 'this' variable points to the object that is calling the method.
+        - The 'this' keyword is not assigned a value until a function where it is defined is actually called.
+
+- **Execution Phase**
+    - The code of the function that generated the current execution context is ran line by line.
+
+---
+### **Hoisting**
+Hoisting lets functions statements be called before they are defined in the code, for example:
+
+```JavaScript
+// Despite the function being called prior to it's definition, this code will still run fine.
+calculateAge(1965);
+
+function calculateAge(year) {
+    console.log(2018 - year);
+}
+```
+This will not work for function expressions.
+
+Variables are hoisted in a different way:
+
+```JavaScript
+console.log(age) // Prints 'undefined'
+var age = 23;    // The variable is now defined.
+console.log(age) // Prints 23
+```
+
+---
+### **Lexical Scoping**
+```JavaScript
+var a = "Hello";                //| ------------------------------------------|^
+first();                        //| ----> Global Scope                        |S
+                                //|       [VO-Global]                         |C
+function first() {              //|                                           |O
+    var b = "Hi";               //| |---------------------------------------| |P
+    second();                   //| | ----> first() scope                   | |E
+                                //| |       [VO-1] + [VO-Global]            | |
+    function second() {         //| |                                       | |C
+        var c = "Hey";          //| | | ----> second() scope -------------| | |H
+        console.log(a + b + c); //| | |  [VO-2] + [VO-1] + [VO-Global]    | | |A
+    }                           //| |-|-----------------------------------|-| |I
+}                               //|-------------------------------------------|N
+```
+
+---
+### **Execution Stack vs Scope Chain**
+The order in which functions are called, is not equal to the order in which functions are written lexically.
+
+```JavaScript
+var a = 'Hello!';
+first();
+
+function first() {
+    var b = 'Hi!';
+    second();
+
+    function second() {
+        var c = 'Hey!';
+        third()
+    }
+}
+
+function third() {
+    var d = 'John';
+    console.log(c);
+}
+
+// In this instance the console will report: "Uncaught ReferenceError: c is not defined
+```
+
+---
+### **DOM Manipulation**
