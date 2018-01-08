@@ -484,3 +484,303 @@ document.querySelector("<selector>").addEventListener("click", function() {
 ```
 
 An event can only happen once the execution stack is empty, that is, all functions have returned. All events that are waiting to be processed are stored in a message queue.
+
+---
+## Advanced JavaScript
+---
+
+### **Everything Is An Object**
+well, almost, everything that isn't a *primitive* data type, as listed in the data types section, is an object. This includes:
+- Arrays
+- Functions
+- Objects
+- Dates
+- Wrappers for numbers, strings, booleans...
+
+---
+### **Constructors**
+A constructor can be thought of in the same way as a class, it is a blueprint for objects, instances of a constructor inherit all the information contained within it.
+
+Every object in JS has a `prototype` property which makes inheritance possible. The prototype property of an object is where we put methods and properties that we want other objects to inherit. The constructors prototype property is NOT the prototype of the constructor itself, it's the prototype of ALL instance that are created through it.
+
+When  a certain method (or property) is called, the search starts in the object itself, and if it cannot be found, the search moves on to the object's prototype. This is called the prototype chain.
+
+Every object, is inherited from the base object, `object`. As such if the child instance was unable to find the method it was looking for in the prototype property of the parent, it will then look in the `object` prototype properties for it. If the method cannot be found in the object prototype, then object will point to `null`, which has no prototype.
+
+```JavaScript
+// We can create a new constructor like this...
+var Person = function(name, yearOfBirth, job) {
+    this.name = name;
+    this.yearOfBirth = yearOfBirth;
+    this.job = job;
+    this.calculateAge = function() {
+        console.log(2018 - this.yearOfBirth);
+    }
+}
+
+// An instance of this constructor can be created like this...
+var john = new Person("John", 1990, "Teacher")
+```
+
+When the `new` operator is used, first a new EMPTY object is created, then the constructor function is called with the arguments specified. This is important because calling the constructor functions puts it on top of the execution stack in it's own execution context with it's own `this` variable. If the new operator didn't exist, when the `this` keyword was used it would be pointing at the global object, however as the new keyword IS used, it instead points to the new empty object that it created.
+
+```JavaScript
+var Person = function(name, yearOfBirth, job) {
+    this.name = name;
+    this.yearOfBirth = yearOfBirth;
+    this.job = job;
+}
+
+// You can even add methods to the prototype property of an object...
+Person.prototype.calculateAge = function() {
+    console.log(2018 - this.yearOfBirth)
+}
+// Now calculateAge is accessible in the same way it was before
+```
+
+`Object.create` allows finer control over inheritance structures of objects.
+
+```JavaScript
+// We can also create constructors in this way...
+var personProto = {
+    calculateAge: function() {
+        console.log(2016 - this.yearOfBirth);
+    }
+};
+
+// The information of an object can be declared and defined like this...
+var john = Object.create(personProto);
+john.name = "John";
+john.yearOfBirth = 1990;
+john.job = "Teacher";
+
+// ...or like this...
+var jane = Object.create(personProto, {
+    name: {value: 'Jane'},
+    yearOfBirth: {value: 1969},
+    job: {value: "Designer"}
+});
+```
+
+---
+### **Primitives vs Objects**
+Variables containing primitives, hold the data inside of the variable itself:
+
+```JavaScript
+var a = 23;
+var b = a;
+
+// When we mutate a after declaring b = a...
+a = 46;
+
+console.log(a); //-> Prints 46 to the console
+console.log(b); //-> Prints 23 to the console
+```
+
+On objects, variables associated with an object, do not hold data themselves, they instead contain a reference to the place in memory where the data is stored:
+
+```JavaScript
+var obj1 = {
+    name: 'John',
+    age: 26
+};
+
+// Object 2 is defined as being equal to object 1...
+var obj2 = obj1;
+
+// But when we mutate a variable of object 1...
+obj1.age = 30;
+
+// ...it also has changed the value of age in object 2
+console.log(obj1.age); // -> Prints 30 to the console
+console.log(obj2.age); // -> Also prints 30 to the console
+```
+
+Another example of the difference can be seen when using functions:
+
+```JavaScript
+var age = 23;
+var obj = {
+    name: "Jay",
+    city: "Manchester"
+};
+
+// This function will mutate the arguments it receives
+function change(a, b) {
+    a = 30;
+    b.city = "Birmingham"
+}
+
+// As the argument 'age' is a primitive variable, a copy will be made
+change(age, obj);
+// This means that the original value for 'a' (outside of the function) will not be changed
+
+// As a result...
+console.log(age); // -> This remains 23
+console.log(obj.city); // -> But this is changed
+```
+---
+### **Functions**
+A function is an instance of the Object type, it behaves like any other object. We can store functions in a variable, pass a function as an argument to another function and also return a function from a function. All of this means that JS has **first-class functions**
+
+Using callback functions can be very powerful:
+
+```JavaScript
+var years = [1990, 1965, 1937, 2005, 1998];
+
+// Here one function is created that uses a function given as an argument
+function arrayCalc(arr, fn) {
+    var arrRes = [];
+    for (var i = 0; i < arr.length; i++) {
+        arrRes.push(fn(arr[i]));
+    }
+    return arrRes;
+}
+
+// This means that the same function can be used with different parts...
+function calculateAge(el) {
+    return 2018 - el;
+}
+// ...To do different things
+function isFullAge(el) {
+    return el >= 18;
+}
+// Here the function is used to calculate some ages
+var ages = arrayCalc(years, calculateAge);
+// Then those ages are used in the same function with a different callback function
+// to determine that person is of full age
+var fullAges = arrayCalc(ages, isFullAge);
+```
+
+As mentioned you can also return a function from a function:
+
+```JavaScript
+// A function is defined that returns another function depending on the job given
+function interviewQuestion(job) {
+    if(job === 'Designer') {
+        return function(name) {
+            console.log(name + ", can you please explain what UX design is?");
+        }
+    } else if (job === 'Teacher') {
+        return function(name) {
+            console.log("What subject do you teach" + name + "?");
+        }
+    } else {
+        return function(name) {
+            console.log("Hello " + name + ", what do you do?");
+        }
+    }
+}
+
+// As the function returns something it needs to be held in a variable
+var teacherQuestion = interviewQuestion("Teacher");
+var designerQuestion = interviewQuestion("Designer");
+
+// And now the interview questions can be asked to specific people
+teacherQuestion('John');
+designerQuestion('Mary');
+
+// You can also pass more than one argument for more than one function like this
+interviewQuestion("Teacher")("Mark");
+```
+
+---
+### **Immediately Invoked Function Expressions (IIFE)**
+Temporary functions can be written and then immediately called. So you can turn something like this:
+```JavaScript
+function game() {
+    var score = Math.random() * 10;
+    console.log(score >= 5);
+}
+
+game();
+```
+
+Into something like this:
+```JavaScript
+(function() {
+    var score = Math.random() * 10;
+    console.log(score >= 5);
+})();
+```
+
+To add arguments to this kind of function you can do this:
+```JavaScript
+(function(goodLuck) {
+    var score = Math.random() * 10;
+    console.log(score >= (5 - goodLuck));
+})(5);
+```
+
+The use case for this is for privacy, in this instance, the variable score is not accessible from the global scope.
+
+---
+### **Closures**
+Closure means an inner function always has access to the variables and parameters of its outer function, even after the out function has returned.
+
+An example of this:
+```JavaScript
+function retirement(retirementAge) {
+    return function(yearOfBirth) {
+        var a = " years until retirement"
+        var age = 2018 - yearOfBirth;
+        console.log((retirementAge - age) + a);
+    }
+}
+
+var retirementUK = retirement(65);
+retirementUK(1994);
+```
+Even though the `a` variable is part of the `retirement` function, which has finished returning when it is used in the declaration of `retirementUK`, it is still accessible for the function that it returns, so calling `retirementUK(1994)` does work.
+
+---
+### **Bind, Call And Apply**
+Methods can be called and given other `this` variables. This is called *method borrowing* an example is shown below:
+
+```JavaScript
+var john = {
+    name: 'John',
+    age: 26,
+    job: 'teacher',
+    presentation: function(style, timeOfDay) {
+        if(style === 'formal') {
+            console.log("Good " + timeOfDay + ". I'm " + this.name + ".");
+        } else if (style === 'friendly') {
+            console.log("Hey! I'm " + this.name + ". Have a nice " + timeOfDay + "!");
+        }
+    }
+};
+
+john.presentation('formal', 'morning');
+
+
+var emily = {
+    name: "Emily",
+    age: 35,
+    job: "Designer"
+};
+
+// The presentation method stored in the john object can be called
+// using a different object for the 'this' variables. The other
+// variables for the method are passed in afterwards.
+john.presentation.call(emily, 'friendly', 'afternoon');
+```
+
+There is another function borrowing method called `apply` that can be used in a similar way,the only difference is the arguments for the method that is being borrowed accepts an array instead.
+
+```JavaScript
+// In this case this won't work as the presentation method isn't expecting an array.
+john.presentation.apply(emily, ['friendly', 'afternoon'])
+```
+
+Another similar method function is `bind`. Bind will instead make a copy of the function so that it can be saved elsewhere. This is called carrying:
+
+```JavaScript
+// This will save the argument of 'friendly' to the style argument
+var johnFriendly = john.presentation.bind(john, 'friendly');
+// so when the function is called, only the time of day needs to be set
+johnFriendly('morning');
+```
+
+---
+### ****
