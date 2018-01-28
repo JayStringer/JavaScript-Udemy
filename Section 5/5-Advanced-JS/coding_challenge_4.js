@@ -1,6 +1,6 @@
 // -----------------------------------*----------------------------------- //
 // My Solution
-/*
+
 // Question Constructor
 var Question = function(question, answers, correctAnswer) {
     this.question = question;
@@ -37,7 +37,7 @@ function displayQuestion(questionObj) {
 
 function promptForAnswer(questionObj) {
     var answer = prompt("Enter your answer here:");
-    if(answer == questionObj.correctAnswer) {
+    if(answer == questionObj.correctAnswer) {v
         console.log("Correct")
         score++
     } else {
@@ -65,7 +65,7 @@ function quiz(questionsArr) {
 }
 
 quiz(questions);
-*/
+
 // -----------------------------------*----------------------------------- //
 // Course Solution
 

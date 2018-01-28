@@ -783,4 +783,18 @@ johnFriendly('morning');
 ```
 
 ---
-### ****
+### **Modules**
+Modules are used to encapuslate sections of code that are related together inside seperate, independant, organised units. The modules contains private functions and variables and only explicitly exposes to the public what they want to be exposed. This prevents the code from being overwritten and hides the specifics of the way it works.
+
+```JavaScript
+// Module Pattern
+var budgetController = (function() {
+
+    var hello = "Hello ";
+
+    var name = function(name) {
+        return hello + name;
+    }
+
+})();
+```
